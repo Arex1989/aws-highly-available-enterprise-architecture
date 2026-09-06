@@ -97,8 +97,8 @@ Availability Zone assignments will be validated against the AWS account before d
 
 | Phase | Engineering Stage | Status |
 |---|---|---|
-| 1 | Architecture & Requirements | 🚧 In Progress |
-| 2 | AWS Account & Cost Controls | ⬜ Not Started |
+| 1 | Architecture & Requirements | ✅ Complete |
+| 2 | AWS Account & Cost Controls | 🚧 In Progress |
 | 3 | VPC & CIDR Design | ⬜ Not Started |
 | 4 | Subnets, Routing & Gateways | ⬜ Not Started |
 | 5 | Network Security | ⬜ Not Started |
@@ -115,4 +115,4 @@ Availability Zone assignments will be validated against the AWS account before d
 
 🟡 **In Progress**
 
-**Current Phase:** Architecture & Requirements
+**Current Phase:** AWS Account & Cost Controls
