@@ -86,20 +86,54 @@ The solution must provide:
 
 | Availability Zone | Subnet Type | CIDR |
 |---|---|---|
-| AZ-1 | Public | `10.20.1.0/24` |
-| AZ-1 | Private Application | `10.20.11.0/24` |
-| AZ-2 | Public | `10.20.2.0/24` |
-| AZ-2 | Private Application | `10.20.12.0/24` |
+| `eu-central-1a` | Public | `10.20.1.0/24` |
+| `eu-central-1a` | Private Application | `10.20.11.0/24` |
+| `eu-central-1b` | Public | `10.20.2.0/24` |
+| `eu-central-1b` | Private Application | `10.20.12.0/24` |
 
-Availability Zone assignments will be validated against the AWS account before deployment.
+Availability Zone assignments were validated against the AWS account before deployment.
+
+Available Frankfurt Availability Zones were confirmed as `eu-central-1a`, `eu-central-1b`, and `eu-central-1c`. The architecture uses `eu-central-1a` and `eu-central-1b` for the initial two-AZ deployment.
+
+## Security & Cost Controls
+
+Phase 2 established the AWS account security and FinOps baseline before infrastructure deployment.
+
+### Identity & Access
+
+- Root account protected with MFA
+- No root access keys created
+- Root CLI session removed from routine project administration
+- IAM Identity Center enabled in `eu-central-1`
+- Dedicated administrative identity configured through IAM Identity Center
+- MFA enabled for the administrative identity
+- `AdministratorAccess` permission set configured with a one-hour session duration
+- AWS CLI authenticated through IAM Identity Center using temporary SSO credentials
+- CLI identity validated through AWS STS
+- Default project region configured as `eu-central-1`
+
+### Cost Governance
+
+- AWS Billing and Cost Management configured
+- Valid account payment method confirmed
+- Recurring monthly AWS cost budget configured at `$50`
+- Account-wide budget scope across AWS services
+- Cost aggregation based on unblended costs
+- Actual-cost alert at 50% (`$25`)
+- Actual-cost alert at 75% (`$37.50`)
+- Actual-cost alert at 90% (`$45`)
+- Forecasted-cost alert at 100% (`$50`)
+- Email notifications configured for budget thresholds
+- AWS Cost Anomaly Detection monitor active
+- Budget actions intentionally left disabled to prevent automated disruption during resilience testing
 
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
 |---|---|---|
 | 1 | Architecture & Requirements | ✅ Complete |
-| 2 | AWS Account & Cost Controls | 🚧 In Progress |
-| 3 | VPC & CIDR Design | ⬜ Not Started |
+| 2 | AWS Account & Cost Controls | ✅ Complete |
+| 3 | VPC & CIDR Design | 🚧 In Progress |
 | 4 | Subnets, Routing & Gateways | ⬜ Not Started |
 | 5 | Network Security | ⬜ Not Started |
 | 6 | EC2 Compute & IAM | ⬜ Not Started |
@@ -115,4 +149,4 @@ Availability Zone assignments will be validated against the AWS account before d
 
 🟡 **In Progress**
 
-**Current Phase:** AWS Account & Cost Controls
+**Current Phase:** VPC & CIDR Design
