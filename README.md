@@ -127,14 +127,56 @@ Phase 2 established the AWS account security and FinOps baseline before infrastr
 - AWS Cost Anomaly Detection monitor active
 - Budget actions intentionally left disabled to prevent automated disruption during resilience testing
 
+## VPC & CIDR Design
+
+The application network uses a dedicated RFC1918 IPv4 address space designed for multi-AZ segmentation and future expansion.
+
+**VPC CIDR:** `10.20.0.0/16`
+
+The VPC provides 65,536 IPv4 addresses and is divided into purpose-specific `/24` subnet ranges.
+
+### Initial Subnet Allocation
+
+| Availability Zone | Network Tier | CIDR | Total Addresses | AWS-Usable Addresses |
+|---|---|---|---:|---:|
+| `eu-central-1a` | Public | `10.20.1.0/24` | 256 | 251 |
+| `eu-central-1b` | Public | `10.20.2.0/24` | 256 | 251 |
+| `eu-central-1a` | Private Application | `10.20.11.0/24` | 256 | 251 |
+| `eu-central-1b` | Private Application | `10.20.12.0/24` | 256 | 251 |
+
+### Addressing Convention
+
+Address space is intentionally grouped by network function to support predictable future expansion:
+
+- `10.20.1.0/24` - `10.20.9.0/24`: Public / edge tier
+- `10.20.11.0/24` - `10.20.19.0/24`: Private application tier
+- `10.20.21.0/24` - `10.20.29.0/24`: Reserved private database tier
+- `10.20.31.0/24` - `10.20.39.0/24`: Reserved management / operations tier
+- `10.20.41.0/24` - `10.20.49.0/24`: Reserved endpoint / internal services tier
+
+Reserved ranges represent the addressing strategy only and are not provisioned until required.
+
+### Network Validation
+
+The CIDR design was validated before deployment:
+
+- All initial subnets are contained within `10.20.0.0/16`
+- All initial subnet overlap tests returned false
+- Each `/24` provides 251 AWS-usable IPv4 addresses
+- Frankfurt Availability Zones were validated through the AWS CLI
+- `eu-central-1a` and `eu-central-1b` were selected for the initial deployment
+- Existing Frankfurt VPC CIDRs were inspected before deployment
+- The existing default VPC uses `172.31.0.0/16`
+- The proposed `10.20.0.0/16` VPC does not overlap the existing default VPC
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
 |---|---|---|
 | 1 | Architecture & Requirements | ✅ Complete |
 | 2 | AWS Account & Cost Controls | ✅ Complete |
-| 3 | VPC & CIDR Design | 🚧 In Progress |
-| 4 | Subnets, Routing & Gateways | ⬜ Not Started |
+| 3 | VPC & CIDR Design | ✅ Complete |
+| 4 | Subnets, Routing & Gateways | 🚧 In Progress |
 | 5 | Network Security | ⬜ Not Started |
 | 6 | EC2 Compute & IAM | ⬜ Not Started |
 | 7 | Application Load Balancer | ⬜ Not Started |
@@ -149,4 +191,4 @@ Phase 2 established the AWS account security and FinOps baseline before infrastr
 
 🟡 **In Progress**
 
-**Current Phase:** VPC & CIDR Design
+**Current Phase:** Subnets, Routing & Gateways
