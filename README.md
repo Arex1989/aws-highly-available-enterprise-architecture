@@ -251,6 +251,62 @@ HTTP/TCP 80 is enabled for the development-stage ALB path.
 
 The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager (ACM), with HTTP redirected to HTTPS when the Application Load Balancer and DNS configuration are deployed.
 
+## EC2 Compute & IAM
+
+Phase 6 deployed and validated the private compute and administrative-access layer across two Availability Zones.
+
+### Compute Architecture
+
+| Instance | Availability Zone | Subnet | Private IP | Public IP |
+|---|---|---|---|---|
+| `ec2-app-enterprise-1a` | `eu-central-1a` | `10.20.11.0/24` | `10.20.11.119` | None |
+| `ec2-app-enterprise-1b` | `eu-central-1b` | `10.20.12.0/24` | `10.20.12.217` | None |
+
+Both instances use Amazon Linux 2023 and the `t3.micro` instance type.
+
+### IAM & Systems Manager
+
+- Dedicated EC2 IAM role `ec2-enterprise-app-role` created
+- AWS managed policy `AmazonSSMManagedInstanceCore` attached
+- Instance profile `ec2-enterprise-app-profile` created and assigned to the application instances
+- Both EC2 instances successfully registered with AWS Systems Manager
+- Both nodes validated with SSM `PingStatus: Online`
+- Systems Manager administration uses private VPC interface endpoints
+- Interactive Session Manager access successfully validated
+- No SSH key pair is required for routine administration
+- No inbound SSH/TCP 22 rule is configured
+
+### Private Systems Manager Connectivity
+
+Interface VPC endpoints were deployed across both private application subnets for:
+
+- `com.amazonaws.eu-central-1.ssm`
+- `com.amazonaws.eu-central-1.ssmmessages`
+
+Private DNS is enabled for both endpoints.
+
+The endpoint security group permits HTTPS/TCP 443 from the application security group, allowing the private EC2 instances to communicate with Systems Manager without requiring public IPv4 addresses or a NAT Gateway.
+
+### Instance Security Controls
+
+- EC2 instances deployed only into private application subnets
+- Public IPv4 assignment disabled
+- Encrypted `gp3` root volumes configured
+- IMDSv2 token enforcement configured with `HttpTokens=required`
+- Unauthenticated IMDS request validated to return HTTP `401`
+- Application security group remains the workload-level traffic boundary
+- Administrative access provided through AWS Systems Manager Session Manager
+
+### Multi-AZ Validation
+
+The compute tier is distributed across:
+
+`eu-central-1a -> 10.20.11.0/24 -> ec2-app-enterprise-1a`
+
+`eu-central-1b -> 10.20.12.0/24 -> ec2-app-enterprise-1b`
+
+This establishes the two-AZ compute foundation required for the Application Load Balancer and subsequent high-availability stages.
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
@@ -260,8 +316,8 @@ The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager 
 | 3 | VPC & CIDR Design | ✅ Complete |
 | 4 | Subnets, Routing & Gateways | ✅ Complete |
 | 5 | Network Security | ✅ Complete |
-| 6 | EC2 Compute & IAM | 🚧 In Progress |
-| 7 | Application Load Balancer | ⬜ Not Started |
+| 6 | EC2 Compute & IAM | ✅ Complete |
+| 7 | Application Load Balancer | 🚧 In Progress |
 | 8 | Auto Scaling & High Availability | ⬜ Not Started |
 | 9 | Storage & Application Configuration | ⬜ Not Started |
 | 10 | CloudWatch Monitoring & Alerting | ⬜ Not Started |
@@ -273,4 +329,4 @@ The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager 
 
 🟡 **In Progress**
 
-**Current Phase:** EC2 Compute & IAM
+**Current Phase:** Application Load Balancer
