@@ -213,7 +213,7 @@ This demonstrates a deliberate trade-off between production resilience requireme
 | 1 | Architecture & Requirements | ✅ Complete |
 | 2 | AWS Account & Cost Controls | ✅ Complete |
 | 3 | VPC & CIDR Design | ✅ Complete |
-| 4 | Subnets, Routing & Gateways | 🚧 In Progress |
+| 4 | Subnets, Routing & Gateways | ✅ Complete |
 | 5 | Network Security | 🚧 In Progress |
 | 6 | EC2 Compute & IAM | ⬜ Not Started |
 | 7 | Application Load Balancer | ⬜ Not Started |
