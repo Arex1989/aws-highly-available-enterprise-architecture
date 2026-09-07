@@ -206,6 +206,51 @@ NAT Gateways are intentionally deferred during the current lab stage to control 
 
 This demonstrates a deliberate trade-off between production resilience requirements and development-environment cost governance.
 
+
+## Network Security
+
+Phase 5 implemented workload-level network security using dedicated AWS Security Groups and a least-privilege traffic model.
+
+### Security Group Architecture
+
+| Security Group | Purpose | Inbound Access |
+|---|---|---|
+| `sg-alb-enterprise-dev` | Public Application Load Balancer | TCP/80 from `0.0.0.0/0` |
+| `sg-app-enterprise-dev` | Private application workloads | TCP/8080 from ALB security group only |
+
+Traffic flow:
+
+`Internet -> TCP/80 -> ALB Security Group -> TCP/8080 -> Application Security Group`
+
+### Least-Privilege Controls
+
+- Application workloads are not directly exposed to the Internet
+- TCP/8080 is permitted only through a security-group reference from the ALB tier
+- No SSH/TCP 22 Internet access is configured
+- No unrestricted inbound rule exists on the application security group
+- Security groups provide stateful workload-level traffic control
+- Default outbound access is retained during the development stage
+
+### Administrative Access Strategy
+
+Direct Internet-facing SSH access is intentionally excluded.
+
+Administrative access to EC2 workloads will use AWS Systems Manager Session Manager where practical, reducing the requirement for inbound management ports, bastion hosts, and SSH key distribution.
+
+### Network ACL Strategy
+
+The VPC default Network ACL was inspected and retained for the development environment.
+
+All four project subnets currently use the default NACL. Security Groups provide the primary workload-level access controls.
+
+Custom restrictive NACLs are intentionally deferred because NACLs are stateless and require explicit handling of return and ephemeral traffic. Production environments can introduce subnet-level NACL controls where additional defense-in-depth requirements justify the operational complexity.
+
+### Transport Security Roadmap
+
+HTTP/TCP 80 is enabled for the development-stage ALB path.
+
+The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager (ACM), with HTTP redirected to HTTPS when the Application Load Balancer and DNS configuration are deployed.
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
@@ -214,8 +259,8 @@ This demonstrates a deliberate trade-off between production resilience requireme
 | 2 | AWS Account & Cost Controls | ✅ Complete |
 | 3 | VPC & CIDR Design | ✅ Complete |
 | 4 | Subnets, Routing & Gateways | ✅ Complete |
-| 5 | Network Security | 🚧 In Progress |
-| 6 | EC2 Compute & IAM | ⬜ Not Started |
+| 5 | Network Security | ✅ Complete |
+| 6 | EC2 Compute & IAM | 🚧 In Progress |
 | 7 | Application Load Balancer | ⬜ Not Started |
 | 8 | Auto Scaling & High Availability | ⬜ Not Started |
 | 9 | Storage & Application Configuration | ⬜ Not Started |
@@ -228,4 +273,4 @@ This demonstrates a deliberate trade-off between production resilience requireme
 
 🟡 **In Progress**
 
-**Current Phase:** Network Security
+**Current Phase:** EC2 Compute & IAM
