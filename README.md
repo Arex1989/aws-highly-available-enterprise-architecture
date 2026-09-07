@@ -349,6 +349,77 @@ HTTP/TCP 80 is intentionally used during the development stage.
 
 The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager (ACM), with HTTP redirected to HTTPS.
 
+## Auto Scaling & High Availability
+
+Phase 8 implemented and validated a multi-AZ Auto Scaling architecture for the private application tier.
+
+### Auto Scaling Architecture
+
+- Auto Scaling Group: `asg-enterprise-app-dev`
+- Launch Template: `lt-enterprise-app-dev`
+- Minimum capacity: `2`
+- Desired capacity: `2`
+- Maximum capacity: `4`
+- Instances distributed across `eu-central-1a` and `eu-central-1b`
+- ELB health checks enabled
+- Application instances automatically registered with the existing target group
+- Application bootstrap performed automatically through launch-template user data
+- EC2 instances remain private with no public IPv4 addresses
+
+### Self-Healing Validation
+
+A controlled EC2 failure was performed by terminating one Auto Scaling-managed application instance.
+
+Failed instance:
+
+`i-072cc3c3b355e235d`
+
+Auto Scaling detected the instance failure and automatically launched a replacement:
+
+`i-00258617b4f91ce63`
+
+The replacement instance successfully:
+
+- Bootstrapped the application automatically
+- Joined the Auto Scaling Group
+- Reached `Healthy / InService`
+- Registered with the Application Load Balancer target group
+- Passed the ALB health check on TCP/8080
+- Registered successfully with AWS Systems Manager
+- Reached SSM `PingStatus: Online`
+
+### Multi-AZ Recovery State
+
+Following recovery, application capacity was restored across both Availability Zones:
+
+- `eu-central-1a` — replacement application node — `Healthy / InService`
+- `eu-central-1b` — surviving application node — `Healthy / InService`
+
+Auto Scaling capacity remained:
+
+- Minimum: `2`
+- Desired: `2`
+- Maximum: `4`
+
+### Availability During Failure
+
+Repeated HTTP requests through the public Application Load Balancer continued to succeed during and after the instance replacement.
+
+Traffic was successfully served by:
+
+- `10.20.11.127` — `eu-central-1a`
+- `10.20.12.214` — `eu-central-1b`
+
+This validates application availability across multiple Availability Zones and demonstrates automatic EC2 failure recovery without manual instance provisioning.
+
+### High Availability Result
+
+The architecture now demonstrates:
+
+`Instance Failure -> Auto Scaling Detection -> Automatic Replacement -> Application Bootstrap -> ALB Registration -> Health Validation -> Traffic Restoration`
+
+The failed instance remains under Auto Scaling lifecycle management during termination and requires no manual intervention.
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
@@ -360,8 +431,8 @@ The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager 
 | 5 | Network Security | ✅ Complete |
 | 6 | EC2 Compute & IAM | ✅ Complete |
 | 7 | Application Load Balancer | ✅ Complete |
-| 8 | Auto Scaling & High Availability | 🚧 In Progress |
-| 9 | Storage & Application Configuration | ⬜ Not Started |
+| 8 | Auto Scaling & High Availability | ✅ Complete |
+| 9 | Storage & Application Configuration | 🚧 In Progress |
 | 10 | CloudWatch Monitoring & Alerting | ⬜ Not Started |
 | 11 | High Availability & Failure Testing | ⬜ Not Started |
 | 12 | Terraform Infrastructure as Code | ⬜ Not Started |
@@ -371,4 +442,4 @@ The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager 
 
 🟡 **In Progress**
 
-**Current Phase:** Auto Scaling & High Availability
+**Current Phase:** Storage & Application Configuration
