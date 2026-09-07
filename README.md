@@ -307,6 +307,48 @@ The compute tier is distributed across:
 
 This establishes the two-AZ compute foundation required for the Application Load Balancer and subsequent high-availability stages.
 
+## Application Load Balancer
+
+Phase 7 implemented and validated highly available application traffic distribution across two AWS Availability Zones.
+
+### Load Balancer Architecture
+
+- Internet-facing Application Load Balancer `alb-enterprise-app-dev`
+- Deployed across `eu-central-1a` and `eu-central-1b`
+- Dedicated public subnets used in both Availability Zones
+- HTTP/TCP 80 listener configured for the development environment
+- Listener forwards requests to the application target group
+
+### Target Group
+
+- Target group `tg-enterprise-app-dev`
+- Target protocol: HTTP
+- Target port: `8080`
+- Health check path: `/`
+- Both private EC2 application instances registered successfully
+- Both targets validated as `healthy`
+
+### Application Traffic Flow
+
+`Internet -> ALB:80 -> Target Group:8080 -> Private EC2 Application Tier`
+
+The application security group permits TCP/8080 from the ALB security group only. Application instances are not directly exposed to the Internet.
+
+### Multi-AZ Validation
+
+Repeated requests through the public ALB DNS endpoint successfully returned responses from both application nodes:
+
+- `10.20.11.119` in `eu-central-1a`
+- `10.20.12.217` in `eu-central-1b`
+
+This validates functional application traffic distribution across both Availability Zones.
+
+### Current Transport Security
+
+HTTP/TCP 80 is intentionally used during the development stage.
+
+The production architecture will use HTTPS/TCP 443 with AWS Certificate Manager (ACM), with HTTP redirected to HTTPS.
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
@@ -317,8 +359,8 @@ This establishes the two-AZ compute foundation required for the Application Load
 | 4 | Subnets, Routing & Gateways | ✅ Complete |
 | 5 | Network Security | ✅ Complete |
 | 6 | EC2 Compute & IAM | ✅ Complete |
-| 7 | Application Load Balancer | 🚧 In Progress |
-| 8 | Auto Scaling & High Availability | ⬜ Not Started |
+| 7 | Application Load Balancer | ✅ Complete |
+| 8 | Auto Scaling & High Availability | 🚧 In Progress |
 | 9 | Storage & Application Configuration | ⬜ Not Started |
 | 10 | CloudWatch Monitoring & Alerting | ⬜ Not Started |
 | 11 | High Availability & Failure Testing | ⬜ Not Started |
@@ -329,4 +371,4 @@ This establishes the two-AZ compute foundation required for the Application Load
 
 🟡 **In Progress**
 
-**Current Phase:** Application Load Balancer
+**Current Phase:** Auto Scaling & High Availability
