@@ -169,6 +169,43 @@ The CIDR design was validated before deployment:
 - The existing default VPC uses `172.31.0.0/16`
 - The proposed `10.20.0.0/16` VPC does not overlap the existing default VPC
 
+
+## Subnets, Routing & Gateways
+
+Phase 4 implemented the multi-AZ network topology defined during the VPC and CIDR design phase.
+
+### Deployed Subnets
+
+| Availability Zone | Network Tier | CIDR |
+|---|---|---|
+| `eu-central-1a` | Public | `10.20.1.0/24` |
+| `eu-central-1b` | Public | `10.20.2.0/24` |
+| `eu-central-1a` | Private Application | `10.20.11.0/24` |
+| `eu-central-1b` | Private Application | `10.20.12.0/24` |
+
+### Internet Connectivity
+
+- Internet Gateway `igw-enterprise-dev` created and attached to the enterprise VPC
+- Dedicated public route table `rtb-public-enterprise-dev` created
+- Public default route configured as `0.0.0.0/0 -> Internet Gateway`
+- Both public subnets explicitly associated with the public route table
+- Automatic public IPv4 assignment remains disabled
+
+### Private Application Routing
+
+- Dedicated private application route table `rtb-private-app-enterprise-dev` created
+- Both private application subnets explicitly associated with the private route table
+- Private route table currently contains only the `10.20.0.0/16` local VPC route
+- No direct Internet Gateway route exists for the private application tier
+
+### NAT Strategy
+
+The production high-availability design uses one NAT Gateway per Availability Zone to avoid a single-AZ dependency for private outbound connectivity.
+
+NAT Gateways are intentionally deferred during the current lab stage to control recurring infrastructure cost. They can be introduced when private workload outbound connectivity is required.
+
+This demonstrates a deliberate trade-off between production resilience requirements and development-environment cost governance.
+
 ## Project Phases
 
 | Phase | Engineering Stage | Status |
@@ -177,7 +214,7 @@ The CIDR design was validated before deployment:
 | 2 | AWS Account & Cost Controls | ✅ Complete |
 | 3 | VPC & CIDR Design | ✅ Complete |
 | 4 | Subnets, Routing & Gateways | 🚧 In Progress |
-| 5 | Network Security | ⬜ Not Started |
+| 5 | Network Security | 🚧 In Progress |
 | 6 | EC2 Compute & IAM | ⬜ Not Started |
 | 7 | Application Load Balancer | ⬜ Not Started |
 | 8 | Auto Scaling & High Availability | ⬜ Not Started |
@@ -191,4 +228,4 @@ The CIDR design was validated before deployment:
 
 🟡 **In Progress**
 
-**Current Phase:** Subnets, Routing & Gateways
+**Current Phase:** Network Security
