@@ -443,3 +443,91 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 🟡 **In Progress**
 
 **Current Phase:** Storage & Application Configuration
+
+## Phase 9 — Storage & Application Configuration
+
+Phase 9 implemented centralized, durable application storage and configuration for the highly available application tier.
+
+### S3 Storage Architecture
+
+- Created private S3 bucket `enterprise-app-storage-149600119261-eu-central-1`
+- S3 Block Public Access enabled
+- S3 object versioning enabled
+- Server-side encryption enabled using AES256 (SSE-S3)
+- Application EC2 instances granted least-privilege S3 access through their IAM role
+- S3 Gateway VPC Endpoint configured for private application subnet access
+- Application instances do not require direct Internet connectivity to access S3
+
+### Persistent Storage Validation
+
+Persistent application data was written from one Auto Scaling instance and successfully retrieved from another instance.
+
+S3 object versioning was validated by overwriting the same object and independently retrieving both historical versions:
+
+- Version 1: `Phase 9 persistent storage test written by Instance 1`
+- Version 2: `Phase 9 VERSION 2 written by Instance 2`
+
+This demonstrated durable application data independent of individual EC2 instance lifecycle.
+
+### Centralized Application Configuration
+
+A versioned application configuration object was created at:
+
+`application-config/app-config.json`
+
+The configuration defines:
+
+- Application environment: `dev`
+- AWS Region: `eu-central-1`
+- Application listener: TCP/8080
+- Storage backend: Amazon S3
+- High availability enabled
+
+Both application nodes successfully retrieved the same configuration from S3.
+
+### Launch Template Integration
+
+Launch Template `lt-enterprise-app-dev` Version 2 was created with automated S3 configuration retrieval during instance bootstrap.
+
+New application instances automatically:
+
+1. Create the application configuration directory.
+2. Retrieve `app-config.json` from private S3.
+3. Load the configuration into the Python application.
+4. Start the application through systemd.
+5. Register with the Application Load Balancer target group.
+
+The locally validated bootstrap script was compared against the AWS-stored Launch Template user data and produced an exact integrity match.
+
+### Rolling Deployment Validation
+
+The Auto Scaling Group was updated from Launch Template Version 1 to Version 2.
+
+An Auto Scaling Instance Refresh performed a controlled rolling replacement while maintaining application availability.
+
+Final refresh state:
+
+- Status: `Successful`
+- Completion: `100%`
+- Instances remaining to update: `0`
+- Two Launch Template Version 2 instances
+- Instances distributed across `eu-central-1a` and `eu-central-1b`
+- Both instances `Healthy / InService`
+
+### End-to-End Validation
+
+Both replacement instances successfully demonstrated:
+
+- Automatic S3 configuration retrieval during bootstrap
+- Active `enterprise-app` systemd service
+- Application listening on TCP/8080
+- Configuration-driven application behavior
+- S3 storage backend configuration
+- Successful ALB health checks
+
+Repeated requests through the public Application Load Balancer returned responses from both application nodes:
+
+`Internet -> ALB:80 -> Target Group:8080 -> Auto Scaling EC2 -> S3 centralized configuration`
+
+Both target-group members were validated as `healthy`.
+
