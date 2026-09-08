@@ -432,8 +432,8 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 | 6 | EC2 Compute & IAM | ✅ Complete |
 | 7 | Application Load Balancer | ✅ Complete |
 | 8 | Auto Scaling & High Availability | ✅ Complete |
-| 9 | Storage & Application Configuration | 🚧 In Progress |
-| 10 | CloudWatch Monitoring & Alerting | ⬜ Not Started |
+| 9 | Storage & Application Configuration | ✅ Complete |
+| 10 | CloudWatch Monitoring & Alerting | 🚧 In Progress |
 | 11 | High Availability & Failure Testing | ⬜ Not Started |
 | 12 | Terraform Infrastructure as Code | ⬜ Not Started |
 | 13 | Documentation, Cost Review & Decommissioning | ⬜ Not Started |
@@ -442,7 +442,7 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 
 🟡 **In Progress**
 
-**Current Phase:** Storage & Application Configuration
+**Current Phase: CloudWatch Monitoring & Alerting
 
 ## Phase 9 — Storage & Application Configuration
 
