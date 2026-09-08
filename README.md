@@ -495,7 +495,7 @@ New application instances automatically:
 2. Retrieve `app-config.json` from private S3.
 3. Load the configuration into the Python application.
 4. Start the application through systemd.
-5. Register with the Application Load Balancer target group.
+5. Be automatically registered with the Application Load Balancer target group through the Auto Scaling Group.
 
 The locally validated bootstrap script was compared against the AWS-stored Launch Template user data and produced an exact integrity match.
 
@@ -503,7 +503,7 @@ The locally validated bootstrap script was compared against the AWS-stored Launc
 
 The Auto Scaling Group was updated from Launch Template Version 1 to Version 2.
 
-An Auto Scaling Instance Refresh performed a controlled rolling replacement while maintaining application availability.
+An Auto Scaling Instance Refresh performed a controlled rolling replacement, after which full application capacity and ALB health were restored across both Availability Zones.
 
 Final refresh state:
 
