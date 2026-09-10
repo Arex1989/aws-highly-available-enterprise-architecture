@@ -372,11 +372,11 @@ A controlled EC2 failure was performed by terminating one Auto Scaling-managed a
 
 Failed instance:
 
-`i-072cc3c3b355e235d`
+`<instance-id>`
 
 Auto Scaling detected the instance failure and automatically launched a replacement:
 
-`i-00258617b4f91ce63`
+`<instance-id>`
 
 The replacement instance successfully:
 
@@ -434,15 +434,15 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 | 8 | Auto Scaling & High Availability | ✅ Complete |
 | 9 | Storage & Application Configuration | ✅ Complete |
 | 10 | CloudWatch Monitoring & Alerting | ✅ Complete |
-| 11 | High Availability & Failure Testing | 🚧 In Progress |
-| 12 | Terraform Infrastructure as Code | ⬜ Not Started |
+| 11 | High Availability & Failure Testing | ✅ Complete |
+| 12 | Terraform Infrastructure as Code | 🚧 In Progress |
 | 13 | Documentation, Cost Review & Decommissioning | ⬜ Not Started |
 
 ## Project Status
 
 🟡 **In Progress**
 
-**Current Phase:** High Availability & Failure Testing
+**Current Phase:** Terraform Infrastructure as Code
 
 ## Phase 9 — Storage & Application Configuration
 
@@ -450,7 +450,7 @@ Phase 9 implemented centralized, durable application storage and configuration f
 
 ### S3 Storage Architecture
 
-- Created private S3 bucket `enterprise-app-storage-149600119261-eu-central-1`
+- Created private S3 bucket `enterprise-app-storage-<account-id>-eu-central-1`
 - S3 Block Public Access enabled
 - S3 object versioning enabled
 - Server-side encryption enabled using AES256 (SSE-S3)
@@ -656,3 +656,106 @@ The final monitoring audit confirmed:
 Phase 10 therefore established an operational observability layer across:
 
 `Application Load Balancer -> Target Group -> Auto Scaling EC2 -> CloudWatch Metrics -> CloudWatch Alarms -> SNS Notifications -> Operations Dashboard`
+
+## Phase 11 - High Availability & Failure Testing
+
+Phase 11 validated the application's resilience, automatic recovery, and continued availability during infrastructure and application-level failures.
+
+### Pre-Failure Baseline
+
+Before failure testing, the environment was validated with:
+
+- Auto Scaling minimum capacity: `2`
+- Auto Scaling desired capacity: `2`
+- Auto Scaling maximum capacity: `4`
+- Two EC2 application instances in `InService`
+- Instances distributed across `eu-central-1a` and `eu-central-1b`
+- Both Application Load Balancer targets reporting `healthy`
+- Application traffic successfully distributed between both instances
+
+This established the healthy baseline for controlled failure testing.
+
+### EC2 Instance Failure Test
+
+A running EC2 instance in the Auto Scaling group was deliberately terminated to simulate infrastructure failure.
+
+The failure test demonstrated the following recovery sequence:
+
+1. The selected EC2 instance transitioned from `running` to `shutting-down`.
+2. Auto Scaling detected the loss of capacity.
+3. A replacement EC2 instance was launched automatically.
+4. The replacement instance executed its bootstrap configuration.
+5. Application configuration was retrieved from Amazon S3.
+6. The application service started successfully.
+7. The replacement instance registered with the target group.
+8. The target progressed through initial health checks and became `healthy`.
+9. Desired capacity returned to `2`.
+10. Application requests continued to be served through the Application Load Balancer.
+
+The final state again contained two healthy `InService` application instances distributed across both Availability Zones.
+
+### Application Service Failure Test
+
+A second failure scenario tested application-level self-healing without manually terminating the EC2 instance.
+
+AWS Systems Manager Run Command was used to stop the `enterprise-app` service on one managed EC2 instance.
+
+The SSM command completed successfully and confirmed the application service state as:
+
+`inactive`
+
+The Application Load Balancer health checks subsequently detected that the instance could no longer serve the application.
+
+The Auto Scaling group responded to the ELB health-check failure by:
+
+1. Marking the affected instance unhealthy.
+2. Taking the unhealthy instance out of service.
+3. Launching a replacement EC2 instance.
+4. Allowing the failed instance to enter termination and target deregistration.
+5. Bootstrapping the replacement application instance.
+6. Registering the replacement with the target group.
+7. Returning the replacement target to `healthy`.
+
+Auto Scaling activity history confirmed that the replacement was launched specifically because an unhealthy instance required replacement.
+
+### Availability During Recovery
+
+Application requests were continuously sent through the public Application Load Balancer while failure recovery was taking place.
+
+Traffic continued to receive valid responses from healthy targets while unhealthy or terminating targets were removed from service.
+
+This demonstrated that the Application Load Balancer and multi-AZ Auto Scaling architecture could maintain application availability while individual application instances failed and were replaced.
+
+### Systems Manager Validation
+
+Replacement instances successfully registered with AWS Systems Manager.
+
+The final managed-instance validation confirmed both active application instances were:
+
+- `Online`
+- Running Amazon Linux
+- Managed by the SSM Agent
+
+This provides an administrative control path without requiring direct SSH access to the application instances.
+
+### Final Self-Healing Audit
+
+The final Phase 11 audit confirmed:
+
+- Auto Scaling minimum capacity: `2`
+- Auto Scaling desired capacity: `2`
+- Auto Scaling maximum capacity: `4`
+- Two healthy EC2 instances in `InService`
+- Instances distributed across `eu-central-1a` and `eu-central-1b`
+- Both target-group members `healthy`
+- Application traffic successfully served through the ALB
+- Failed instances automatically removed and replaced
+- Replacement instances successfully bootstrapped
+- Auto Scaling recovery activities completed successfully
+- `enterprise-app-unhealthy-targets` alarm: `OK`
+- `enterprise-app-target-5xx-errors` alarm: `OK`
+- `enterprise-app-high-latency` alarm: `OK`
+
+Phase 11 therefore validated self-healing at both the infrastructure and application-service layers:
+
+`Instance Failure / Application Failure -> ALB Health Detection -> Auto Scaling Replacement -> Bootstrap -> Target Registration -> Health Validation -> Traffic Restoration`
