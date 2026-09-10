@@ -436,13 +436,13 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 | 10 | CloudWatch Monitoring & Alerting | ✅ Complete |
 | 11 | High Availability & Failure Testing | ✅ Complete |
 | 12 | Terraform Infrastructure as Code | ✅ Complete |
-| 13 | Documentation, Cost Review & Decommissioning | 🚧 In Progress |
+| 13 | Documentation, Cost Review & Decommissioning | ✅ Complete |
 
 ## Project Status
 
 🟡 **In Progress**
 
-**Current Phase:** Documentation, Cost Review & Decommissioning
+**Current Phase:** Project Complete — All 13 Phases Successfully Completed
 
 ## Phase 9 — Storage & Application Configuration
 
@@ -869,3 +869,178 @@ Key outcomes:
 The environment has therefore progressed from manually deployed AWS infrastructure toward reproducible and declaratively managed infrastructure using Terraform.
 
 `Existing AWS Infrastructure -> Terraform Configuration -> Terraform Import -> State Reconciliation -> Controlled Apply -> Zero-Drift Validation`
+
+
+## Phase 13 — Documentation, Cost Review & Controlled Decommissioning
+
+Phase 13 completed the AWS Highly Available Enterprise Architecture project by performing a structured cost review, dependency-aware infrastructure decommission, and final resource audit.
+
+Rather than deleting resources indiscriminately, the environment was dismantled in dependency order using the AWS CLI, with verification performed after each major operation.
+
+### AWS Cost Review
+
+AWS Cost Explorer was used to review month-to-date expenditure, daily cost trends, service-level charges, and Free Tier utilization before decommissioning.
+
+The review identified costs associated with services including:
+
+- Amazon EC2
+- Elastic Load Balancing
+- Amazon VPC
+- Amazon CloudWatch
+- Amazon S3
+- AWS Key Management Service
+- Amazon SNS
+- AWS Glue
+- AWS Secrets Manager
+- Amazon SQS
+
+The month-to-date cost observed during the Phase 13 review was approximately **$8.14 USD**.
+
+This exercise demonstrated the operational importance of cost visibility and timely removal of temporary cloud infrastructure.
+
+### Pre-Decommission Infrastructure Audit
+
+Before deleting resources, the deployed environment was inventoried and dependencies were identified.
+
+The audit included:
+
+- EC2 instances
+- Auto Scaling Group
+- EC2 Launch Template
+- Application Load Balancer
+- Target Group
+- Elastic IP addresses
+- VPC endpoints
+- Security groups
+- Network interfaces
+- Public and private subnets
+- Route tables and route-table associations
+- Internet Gateway
+- NAT Gateway dependencies
+- CloudWatch alarms
+- SNS notification resources
+- S3 application storage
+- Terraform-managed networking resources
+
+This dependency discovery was used to determine the safe deletion sequence.
+
+### Controlled Decommissioning
+
+The environment was removed progressively rather than through an uncontrolled bulk deletion.
+
+The decommission sequence included:
+
+1. Auto Scaling capacity was reduced from two instances to zero.
+2. EC2 instance termination was monitored and verified.
+3. The empty Auto Scaling Group was deleted.
+4. The EC2 Launch Template was removed.
+5. The Application Load Balancer was deleted.
+6. Target Group dependencies were investigated and the Target Group was removed.
+7. VPC endpoints were deleted and endpoint ENI cleanup was verified.
+8. Custom security groups were removed after reference validation.
+9. Route-table associations were inspected and removed.
+10. Custom route tables were deleted.
+11. Public and private subnets were deleted.
+12. The Internet Gateway was detached and deleted.
+13. The enterprise VPC was deleted.
+14. CloudWatch alarms and the SNS notification topic were removed.
+15. All versions of objects in the versioned S3 bucket were deleted.
+16. The S3 bucket itself was deleted.
+
+### Dependency Troubleshooting
+
+Several AWS dependency conditions were encountered during decommissioning.
+
+These included:
+
+- Target Group `ResourceInUse` conditions
+- Route-table `DependencyViolation`
+- stale route-table association identifiers
+- asynchronous VPC endpoint deletion
+- AWS-managed network interface cleanup
+- versioned S3 object deletion requirements
+
+Rather than forcing deletion, dependencies were inspected using AWS CLI discovery commands and resources were removed only after dependent objects had been confirmed or cleared.
+
+This demonstrated an important cloud operations principle:
+
+`Discover -> Validate Dependencies -> Remove Dependency -> Delete Resource -> Verify`
+
+### Versioned S3 Cleanup
+
+The project S3 bucket had versioning enabled.
+
+Before deleting the bucket, both current objects and historical object versions were inventoried.
+
+All object versions were then explicitly removed before the bucket itself was deleted.
+
+This ensured that no versioned data remained and allowed the S3 bucket deletion to complete successfully.
+
+### Final Resource Audit
+
+A final AWS resource audit was performed after decommissioning.
+
+The audit confirmed that the project no longer had:
+
+- Running EC2 instances
+- Application Load Balancers
+- Target Groups
+- Auto Scaling Groups
+- Launch Templates
+- Elastic IP addresses
+- Project S3 buckets
+- Project CloudWatch alarms
+- Project SNS topics
+- VPC endpoints
+- NAT Gateways
+- The enterprise VPC
+
+Only the AWS account's default VPC remained.
+
+### Phase 13 Outcome
+
+Phase 13 successfully demonstrated the complete infrastructure lifecycle:
+
+`Design -> Deploy -> Secure -> Monitor -> Test -> Manage with Terraform -> Review Cost -> Decommission -> Verify`
+
+The project therefore covered not only infrastructure deployment, but also operational ownership and responsible resource retirement.
+
+Key outcomes:
+
+- AWS infrastructure costs reviewed using Cost Explorer
+- Free Tier utilization reviewed
+- Infrastructure dependencies mapped before deletion
+- Compute layer safely scaled down
+- EC2 instances terminated and verified
+- Auto Scaling Group removed
+- Launch Template removed
+- Application Load Balancer removed
+- Target Group removed
+- VPC endpoints and associated ENIs cleaned up
+- Custom security groups removed
+- Route-table dependencies resolved
+- Public and private subnets removed
+- Internet Gateway detached and deleted
+- Enterprise VPC successfully deleted
+- CloudWatch monitoring resources removed
+- SNS notification infrastructure removed
+- Versioned S3 objects permanently removed
+- S3 project bucket deleted
+- Final residual-resource audit completed
+- Only the AWS default VPC remains
+
+**Phase 13 Status: Complete**
+
+---
+
+## Project Completion
+
+All thirteen phases of the AWS Highly Available Enterprise Architecture project have now been completed.
+
+The project progressed through architecture design, networking, compute, high availability, storage, monitoring, failure testing, Infrastructure as Code adoption, cost governance, and controlled decommissioning.
+
+The completed project demonstrates practical experience with:
+
+**AWS Architecture • VPC Networking • EC2 • Auto Scaling • Application Load Balancing • S3 • IAM/SSO • Systems Manager • CloudWatch • SNS • High Availability • Failure Recovery • AWS CLI • Terraform • Infrastructure as Code • Cost Management • Dependency Analysis • Infrastructure Lifecycle Management**
+
+**Project Status: ✅ COMPLETE**
