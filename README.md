@@ -435,14 +435,14 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 | 9 | Storage & Application Configuration | ✅ Complete |
 | 10 | CloudWatch Monitoring & Alerting | ✅ Complete |
 | 11 | High Availability & Failure Testing | ✅ Complete |
-| 12 | Terraform Infrastructure as Code | 🚧 In Progress |
-| 13 | Documentation, Cost Review & Decommissioning | ⬜ Not Started |
+| 12 | Terraform Infrastructure as Code | ✅ Complete |
+| 13 | Documentation, Cost Review & Decommissioning | 🚧 In Progress |
 
 ## Project Status
 
 🟡 **In Progress**
 
-**Current Phase:** Terraform Infrastructure as Code
+**Current Phase:** Documentation, Cost Review & Decommissioning
 
 ## Phase 9 — Storage & Application Configuration
 
@@ -759,3 +759,113 @@ The final Phase 11 audit confirmed:
 Phase 11 therefore validated self-healing at both the infrastructure and application-service layers:
 
 `Instance Failure / Application Failure -> ALB Health Detection -> Auto Scaling Replacement -> Bootstrap -> Target Registration -> Health Validation -> Traffic Restoration`
+
+## Phase 12 – Terraform Infrastructure as Code
+
+Phase 12 introduced Terraform Infrastructure as Code (IaC) management for the existing AWS enterprise architecture.
+
+Rather than recreating the infrastructure, existing AWS resources were progressively imported into Terraform state and reconciled with Terraform configuration. This allowed the running environment to transition toward declarative infrastructure management without destructive replacement.
+
+### Terraform Foundation
+
+A dedicated `terraform/` directory was created containing the initial Terraform configuration.
+
+The Terraform configuration includes:
+
+- AWS provider configuration
+- AWS region configuration for `eu-central-1`
+- AWS SSO profile integration
+- Project and environment variables
+- Standardized resource tagging
+- Terraform provider dependency locking
+
+Terraform initialization successfully installed the HashiCorp AWS provider and generated the `.terraform.lock.hcl` dependency lock file.
+
+Configuration validation completed successfully using:
+
+`terraform validate`
+
+### Existing Infrastructure Discovery
+
+Before importing resources, the deployed AWS environment was inventoried using the AWS CLI.
+
+The discovery process validated the existing:
+
+- VPC
+- Public subnets
+- Private application subnets
+- Internet Gateway
+- Route tables
+- Security groups
+- Application Load Balancer
+- Target group
+- Auto Scaling group
+- Launch template
+- S3 application configuration storage
+
+This ensured Terraform configuration was based on the actual deployed architecture rather than assumptions.
+
+### Terraform State Adoption
+
+Existing infrastructure was imported into Terraform state rather than recreated.
+
+Resources adopted during this phase included:
+
+- Enterprise VPC
+- Public subnet in `eu-central-1a`
+- Public subnet in `eu-central-1b`
+- Private application subnet in `eu-central-1a`
+- Private application subnet in `eu-central-1b`
+- Internet Gateway
+- Public route table
+- Private application route table
+
+Terraform state was verified using:
+
+`terraform state list`
+
+This established Terraform ownership and state tracking for the imported infrastructure.
+
+### Configuration Reconciliation
+
+After import, Terraform initially detected configuration drift between the existing AWS resources and the new Terraform definitions.
+
+The detected changes were reviewed before execution.
+
+The reconciliation consisted of non-destructive in-place updates, primarily aligning resource tags and Terraform-managed metadata.
+
+No resources were scheduled for creation or destruction.
+
+The approved Terraform operation completed with:
+
+`Resources: 0 added, 8 changed, 0 destroyed.`
+
+### Final Terraform Validation
+
+Following reconciliation, Terraform was executed again to compare the declared configuration against the deployed AWS environment.
+
+The final result was:
+
+`No changes. Your infrastructure matches the configuration.`
+
+This confirmed that the Terraform state, Terraform configuration, and deployed AWS infrastructure were synchronized.
+
+### Phase 12 Outcome
+
+Phase 12 successfully established the foundation for Infrastructure as Code management of the AWS environment.
+
+Key outcomes:
+
+- Terraform successfully initialized
+- AWS provider configuration validated
+- Existing AWS infrastructure inventoried before adoption
+- Existing resources imported without destructive recreation
+- Terraform state established
+- Configuration drift reviewed before modification
+- Eight resources reconciled using in-place updates
+- Zero resources destroyed
+- Final Terraform plan returned zero changes
+
+The environment has therefore progressed from manually deployed AWS infrastructure toward reproducible and declaratively managed infrastructure using Terraform.
+
+`Existing AWS Infrastructure -> Terraform Configuration -> Terraform Import -> State Reconciliation -> Controlled Apply -> Zero-Drift Validation`

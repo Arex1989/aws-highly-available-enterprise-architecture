@@ -36,3 +36,16 @@ override.tf.json
 # SSH / private keys
 *.pem
 *.key
+
+# Terraform local state and working files
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+*.tfvars
+*.tfvars.json
+
+# Keep Terraform provider dependency lock file
+!**/.terraform.lock.hcl
