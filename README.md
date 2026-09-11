@@ -23,6 +23,12 @@ Cost Review → Dependency Analysis → Controlled Decommissioning.
 
 **Status: ✅ Complete — 13/13 Phases**
 
+## Architecture Diagram
+
+The architecture was designed around a highly available multi-AZ deployment model, with public-facing load balancing, private application workloads, managed AWS services, monitoring, and Infrastructure as Code.
+
+![AWS Highly Available Enterprise Architecture](aws-enterprise-architecture.png)
+
 ## Key Technologies
 
 - AWS VPC
