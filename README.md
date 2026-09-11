@@ -1,17 +1,109 @@
 # AWS Highly Available Enterprise Architecture
 
-> **Production-style AWS cloud engineering portfolio demonstrating highly available architecture, multi-AZ networking, private compute, load balancing, Auto Scaling, IAM, monitoring, security, Infrastructure as Code, resilience testing, and FinOps.**
+A hands-on AWS cloud engineering project demonstrating the design, deployment,
+operation, monitoring, automation, Infrastructure as Code, cost governance,
+failure recovery, and controlled decommissioning of a highly available
+multi-AZ application architecture.
 
-## Executive Summary
+## Project Overview
 
-This project demonstrates the design, deployment, operation, validation, and controlled retirement of a highly available AWS enterprise application environment.
+This project was built to demonstrate practical AWS infrastructure engineering
+skills across the complete cloud resource lifecycle.
 
-The architecture is designed to eliminate common single points of failure by distributing workloads across multiple Availability Zones, placing application compute in private subnets, distributing traffic through an Application Load Balancer, and automatically replacing unhealthy compute resources.
+The environment implements a multi-Availability Zone architecture using
+Amazon VPC, EC2, Auto Scaling, Application Load Balancing, S3, AWS Systems
+Manager, CloudWatch, SNS, IAM/SSO, and Terraform.
 
-The project will be implemented through hands-on AWS engineering and progressively managed through Terraform Infrastructure as Code.
+Rather than focusing only on deployment, the project covers the complete
+engineering lifecycle:
+
+Architecture → Networking → Compute → High Availability → Storage →
+Monitoring → Failure Testing → Recovery → Infrastructure as Code →
+Cost Review → Dependency Analysis → Controlled Decommissioning.
+
+**Status: ✅ Complete — 13/13 Phases**
+
+## Key Technologies
+
+- AWS VPC
+- Amazon EC2
+- EC2 Auto Scaling
+- Application Load Balancer
+- Target Groups
+- Amazon S3
+- AWS Systems Manager
+- VPC Endpoints
+- Amazon CloudWatch
+- Amazon SNS
+- IAM / AWS IAM Identity Center
+- AWS CLI
+- Terraform
+- Git / GitHub
+
+## Architecture Highlights
+
+- Multi-AZ network architecture
+- Public and private application subnets
+- Application Load Balancer for traffic distribution
+- Auto Scaling for workload availability
+- Private workload architecture
+- Systems Manager connectivity through VPC endpoints
+- Versioned S3 application storage
+- CloudWatch monitoring and alerting
+- SNS notification infrastructure
+- Failure and recovery testing
+- Infrastructure managed through Terraform
+- Cost and Free Tier usage analysis
+- Dependency-aware infrastructure decommissioning
+
+## Infrastructure as Code
+
+Core networking infrastructure was represented using Terraform, including:
+
+- VPC
+- Public and private subnets
+- Internet Gateway
+- Route tables and associations
+- Terraform variables and provider configuration
+
+Terraform state and local working files are intentionally excluded from source
+control while the provider dependency lock file is retained.
+
+## Project Outcome
+
+The complete AWS environment was successfully validated and then
+decommissioned in dependency order.
+
+The decommissioning process included:
+
+- Scaling the Auto Scaling Group to zero
+- Removing the Auto Scaling Group
+- Removing the EC2 Launch Template
+- Removing the Application Load Balancer
+- Removing the Target Group
+- Removing VPC endpoints and associated ENIs
+- Removing custom security groups
+- Resolving route-table dependencies
+- Removing public and private subnets
+- Detaching and deleting the Internet Gateway
+- Deleting the project VPC
+- Removing CloudWatch alarms
+- Removing SNS notification infrastructure
+- Permanently removing versioned S3 objects
+- Deleting the project S3 bucket
+- Performing a final residual-resource audit
+
+The final AWS audit confirmed that the project infrastructure had been
+successfully removed, leaving only the AWS account's default VPC.
+
+## Skills Demonstrated
+
+AWS Architecture • Cloud Networking • High Availability • EC2 • Auto Scaling •
+Load Balancing • S3 • IAM • Systems Manager • CloudWatch • SNS • AWS CLI •
+Terraform • Infrastructure as Code • Troubleshooting • Failure Recovery •
+Cost Management • Dependency Analysis • Infrastructure Lifecycle Management
 
 ## Business Scenario
-
 A fictional enterprise requires a secure and highly available AWS environment for hosting a business application.
 
 The application must remain available when an individual compute instance becomes unhealthy and should tolerate infrastructure failure within a single Availability Zone.
@@ -440,7 +532,7 @@ The failed instance remains under Auto Scaling lifecycle management during termi
 
 ## Project Status
 
-🟡 **In Progress**
+✅ **Complete**
 
 **Current Phase:** Project Complete — All 13 Phases Successfully Completed
 
